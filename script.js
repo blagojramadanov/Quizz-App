@@ -30,13 +30,8 @@ const questions = [
     correct: 2,
   },
   {
-    question: "Wer ist der Trainer von Manchester City (2025)?",
-    answers: [
-      "Pep Guardiola",
-      "Jürgen Klopp",
-      "Zinedine Zidane",
-      "Carlo Ancelotti",
-    ],
+    question: "Wer war der Trainer von Manchester United in 2008?",
+    answers: ["Ferguson", "Jürgen Klopp", "Zinedine Zidane", "Carlo Ancelotti"],
     correct: 0,
   },
   {
@@ -50,8 +45,8 @@ const questions = [
     correct: 1,
   },
   {
-    question: "Was ist die Hauptstadt von Deutschland?",
-    answers: ["Hamburg", "München", "Berlin", "Hannover"],
+    question: "Wo spielt Manchster United",
+    answers: ["La Liga", "Bundesliga", "Premier Liga", "Seria A"],
     correct: 2,
   },
   {
@@ -60,6 +55,7 @@ const questions = [
     correct: 2,
   },
 ];
+// questions.map((q) => q.question).forEach((q) => console.log(q));
 
 let currentQuestion = -1;
 let answered = false;
@@ -69,6 +65,9 @@ const questionEl = document.getElementById("question");
 const answersEl = document.getElementById("answers");
 const nextBtn = document.getElementById("next");
 const showAnswerBtn = document.getElementById("showAnswer");
+const scoreEl = document.getElementById("score");
+const backBtn = document.getElementById("back");
+const forwardBtn = document.getElementById("forward");
 
 function loadQuestion() {
   answered = false;
@@ -82,4 +81,96 @@ function loadQuestion() {
     btn.addEventListener("click", () => checkAnswer(index));
     answersEl.appendChild(btn);
   });
+
+  // console.log("Loaded question:", q.question);
 }
+
+function checkAnswer(selected) {
+  if (answered) return;
+  answered = true;
+
+  const buttons = answersEl.querySelectorAll("button");
+  const correctIndex = questions[currentQuestion].correct;
+  // console.log("Selected:", selected, " Correct:", correctIndex);
+
+  if (selected === correctIndex) {
+    // console.log(" Correct");
+    buttons[selected].classList.add("correct");
+    score++;
+    scoreEl.textContent = `Score ${score}`;
+  } else {
+    // console.log("Wrong");
+    buttons[selected].classList.add("wrong");
+    buttons[correctIndex].classList.add("correct");
+    alert("Falsh");
+  }
+}
+
+function showAnswer() {
+  if (currentQuestion < 0 || answered) return;
+  answered = true;
+
+  const buttons = answersEl.querySelectorAll("button");
+  const correctIndex = questions[currentQuestion].correct;
+  buttons[correctIndex].classList.add("correct");
+}
+
+function nextQuestion() {
+  currentQuestion++;
+  if (currentQuestion < questions.length) {
+    loadQuestion();
+  } else {
+    questionEl.textContent = "Hier ist das Ende";
+    scoreEl.textContent = `Dein Score: ${score}`;
+    answersEl.innerHTML = "";
+    showRestartButton();
+  }
+}
+
+function showRestartButton() {
+  const restartBtn = document.createElement("button");
+  restartBtn.textContent = "Neustart";
+  restartBtn.id = "restart";
+  restartBtn.addEventListener("click", restartQuiz);
+  document.querySelector(".buttons").appendChild(restartBtn);
+}
+
+function restartQuiz() {
+  currentQuestion = -1;
+  score = 0;
+  scoreEl.textContent = "Score: 0";
+  questionEl.textContent = "Druck Weiter";
+  answersEl.innerHTML = "";
+
+  const restartBtn = document.getElementById("restart");
+  if (restartBtn) restartBtn.remove();
+}
+
+backBtn.addEventListener("click", () => {
+  if (currentQuestion > 0) {
+    currentQuestion--;
+    loadQuestion();
+  } else {
+    console.log(Back);
+  }
+});
+
+forwardBtn.addEventListener("click", () => {
+  if (currentQuestion < questions.length - 1) {
+    currentQuestion++;
+    loadQuestion();
+  } else {
+    console.log(Forward);
+  }
+});
+
+nextBtn.addEventListener("click", () => {
+  if (currentQuestion === -1) {
+    currentQuestion = 0;
+    loadQuestion();
+  } else {
+    nextQuestion();
+  }
+});
+
+showAnswerBtn.addEventListener("click", showAnswer);
