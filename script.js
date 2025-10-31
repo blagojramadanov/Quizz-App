@@ -45,7 +45,7 @@ const questions = [
     correct: 1,
   },
   {
-    question: "Wo spielt Manchster United",
+    question: "Wo spielt Manchester United?",
     answers: ["La Liga", "Bundesliga", "Premier Liga", "Seria A"],
     correct: 2,
   },
@@ -55,7 +55,8 @@ const questions = [
     correct: 2,
   },
 ];
-// questions.map((q) => q.question).forEach((q) => console.log(q));
+
+questions.forEach((q) => (q.userAnswer = null));
 
 let currentQuestion = -1;
 let answered = false;
@@ -82,36 +83,50 @@ function loadQuestion() {
     answersEl.appendChild(btn);
   });
 
-  // console.log("Loaded question:", q.question);
+  if (q.userAnswer !== null) {
+    answered = true;
+    const buttons = answersEl.querySelectorAll("button");
+    const correctIndex = q.correct;
+
+    if (q.userAnswer === correctIndex) {
+      buttons[q.userAnswer].classList.add("correct");
+    } else {
+      buttons[q.userAnswer].classList.add("wrong");
+      buttons[correctIndex].classList.add("correct");
+    }
+  }
 }
 
 function checkAnswer(selected) {
-  if (answered) return;
+  const q = questions[currentQuestion];
+
+  if (answered || q.userAnswer !== null) return;
   answered = true;
 
   const buttons = answersEl.querySelectorAll("button");
-  const correctIndex = questions[currentQuestion].correct;
-  // console.log("Selected:", selected, " Correct:", correctIndex);
+  const correctIndex = q.correct;
+
+  q.userAnswer = selected;
 
   if (selected === correctIndex) {
-    // console.log(" Correct");
     buttons[selected].classList.add("correct");
     score++;
-    scoreEl.textContent = `Score ${score}`;
+    scoreEl.textContent = `Score: ${score}`;
   } else {
-    // console.log("Wrong");
     buttons[selected].classList.add("wrong");
     buttons[correctIndex].classList.add("correct");
-    alert("Falsh");
+    alert("Falsch");
   }
 }
 
 function showAnswer() {
-  if (currentQuestion < 0 || answered) return;
-  answered = true;
+  if (currentQuestion < 0) return;
+  const q = questions[currentQuestion];
+  if (answered) return;
 
+  answered = true;
   const buttons = answersEl.querySelectorAll("button");
-  const correctIndex = questions[currentQuestion].correct;
+  const correctIndex = q.correct;
   buttons[correctIndex].classList.add("correct");
 }
 
@@ -128,6 +143,7 @@ function nextQuestion() {
 }
 
 function showRestartButton() {
+  if (document.getElementById("restart")) return;
   const restartBtn = document.createElement("button");
   restartBtn.textContent = "Neustart";
   restartBtn.id = "restart";
@@ -139,8 +155,10 @@ function restartQuiz() {
   currentQuestion = -1;
   score = 0;
   scoreEl.textContent = "Score: 0";
-  questionEl.textContent = "Druck Weiter";
+  questionEl.textContent = "Drück Weiter";
   answersEl.innerHTML = "";
+
+  questions.forEach((q) => (q.userAnswer = null));
 
   const restartBtn = document.getElementById("restart");
   if (restartBtn) restartBtn.remove();
@@ -150,8 +168,6 @@ backBtn.addEventListener("click", () => {
   if (currentQuestion > 0) {
     currentQuestion--;
     loadQuestion();
-  } else {
-    console.log(Back);
   }
 });
 
@@ -159,8 +175,6 @@ forwardBtn.addEventListener("click", () => {
   if (currentQuestion < questions.length - 1) {
     currentQuestion++;
     loadQuestion();
-  } else {
-    console.log(Forward);
   }
 });
 
